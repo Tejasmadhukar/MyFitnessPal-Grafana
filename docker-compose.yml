@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  grafana:
+    image: grafana/grafana-enterprise
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    volumes:
+      - grafana-storage:/var/lib/grafana
+  # python-server:
+  #   Add this later,
+  #   This will contain the FastAPI server which will accept user csv, pre-processing and cleaning them
+  #   before displaying them using grafana
+
+volumes:
+  grafana-storage: {}
