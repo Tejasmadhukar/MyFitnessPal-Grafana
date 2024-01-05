@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "myfitnesspal-grafana"
+version = "0.1.0"
+description = "Beautifully visualizes MyFitnessPal data using Grafana"
+authors = ["Tejas013 <tejasmadhukar6@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11.6"
+pandas = "^2.1.4"
+pydantic = "^2.5.3"
+
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.28.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
