@@ -3,6 +3,7 @@ import pandas as pd
 import json
 
 #!! Remeber to make a function to add column name to myFitnessPal csv data. Column should be ['Index', 'Date', 'Individual-Intake', 'Total-Intake'].
+#!! Add a validation function for dataframe using pydantic
 
 
 def AddCloumnHeaders(df: pd.DataFrame):
@@ -30,12 +31,9 @@ def ExtractTotalCalories(df: pd.DataFrame):
             if i["name"] == "Calories":
                 GoalCal = i["value"]
 
-        new_entry = {
-            "Date": val["Date"],
-            "TotalCalories": TotalCal,
-            "GoalCalories": GoalCal,
-        }
-        new_df = new_df.append(new_entry, ignore_index=True)
+        new_entry = [val["Date"], TotalCal, GoalCal]
+
+        new_df.loc[len(new_df.index)] = new_entry
 
     return new_df
 
