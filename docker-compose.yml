@@ -9,10 +9,6 @@ services:
       - 3000:3000
     volumes:
       - grafana-storage:/var/lib/grafana
-  # python-server:
-  #   Add this later,
-  #   This will contain the FastAPI server which will accept user csv, pre-processing and cleaning them
-  #   before displaying them using grafana
-
+  # add go server here
 volumes:
   grafana-storage: {}

@@ -1,24 +1,16 @@
-FROM python:3.12-slim
-
-ENV PYTHONFAULTHANDLER=1 \
-    PYTHONUNBUFFERED=1 \
-    PYTHONHASHSEED=random \
-    PIP_NO_CACHE_DIR=off \
-    PIP_DISABLE_PIP_VERSION_CHECK=on \
-    PIP_DEFAULT_TIMEOUT=100 \
-    POETRY_VERSION=1.7.1
-
-RUN pip install "poetry==$POETRY_VERSION"
+FROM golang:1.21
 
 WORKDIR /app
-COPY poetry.lock pyproject.toml /app/
 
-RUN poetry config virtualenvs.create false \
-    && poetry install --no-interaction --no-ansi
+COPY go.mod go.sum ./
+RUN go mod download && go mod verify
 
-COPY . /app
+COPY . ./
 
-EXPOSE 80
-EXPOSE $PORT
+ENV GOARCH=arm64
 
-CMD ["python", "main.py"]
+EXPOSE 3000
+
+RUN go build -o MyFitnessPal-Grafana .
+
+CMD [ "/MyFitnessPal-Grafana" ]
