@@ -1,4 +1,4 @@
-package main
+package models
 
 type NutritionInfo struct {
 	Name  string `json:"name"`
