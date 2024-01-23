@@ -1,16 +1,26 @@
-FROM golang:1.21
+FROM golang:1.21 AS builder
 
-WORKDIR /app
-
-COPY go.mod go.sum ./
-RUN go mod download && go mod verify
-
-COPY . ./
+WORKDIR /app/
 
 ENV GOARCH=arm64
 
-EXPOSE 3000
+ADD go.mod go.sum ./
+RUN go mod download && go mod verify
 
-RUN go build -o MyFitnessPal-Grafana .
+ADD . ./
 
-CMD [ "/MyFitnessPal-Grafana" ]
+RUN go build -o ./bin/main ./cmd/app
+
+FROM golang:1.21 AS server
+
+WORKDIR /app/
+
+COPY --from=builder /app/bin/main ./
+COPY --from=builder /app/internal/assets ./assets
+
+ENV ASSETS_DIR=./assets
+ENV GOARCH=arm64
+
+EXPOSE 80
+
+CMD ["./main"]

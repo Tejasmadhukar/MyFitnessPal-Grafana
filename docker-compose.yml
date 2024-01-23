@@ -9,6 +9,11 @@ services:
       - 3000:3000
     volumes:
       - grafana-storage:/var/lib/grafana
-  # add go server here
+  server:
+    build: .
+    ports:
+      - 80:80
+    depends_on:
+      - grafana
 volumes:
   grafana-storage: {}
