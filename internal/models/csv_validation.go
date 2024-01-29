@@ -1,11 +1,16 @@
 package models
 
-type NutritionInfo struct {
-	Name  string `json:"name"`
-	Value int    `json:"value"`
-}
+import "slices"
 
-type TotalIntake struct {
-	Total []NutritionInfo `json:"total"`
-	Goal  []NutritionInfo `json:"goal"`
+var (
+	ValidHeaders = []string{"Date", "Meal", "Calories"}
+)
+
+func CheckCsvHeaders(Headers []string) bool {
+	for _, val := range ValidHeaders {
+		if !slices.Contains(Headers, val) {
+			return false
+		}
+	}
+	return true
 }
