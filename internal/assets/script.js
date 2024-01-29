@@ -1,9 +1,9 @@
 const theme_switch_icon = document.getElementById("theme_switch_icon");
 const github_icon = document.getElementById("github_icon");
-const file_name_container = document.getElementById("file_name_container")
-const file_choose_button = document.getElementById("file_choose_button")
-const file_submit_button = document.getElementById("file_submit_button")
-const file_clear_button = document.getElementById("file_clear_button")
+const file_name_container = document.getElementById("file_name_container");
+const file_choose_button = document.getElementById("file_choose_button");
+const file_submit_button = document.getElementById("file_submit_button");
+const error_container = document.getElementById("any-errors");
 
 const changeTheme = () => {
   if (document.documentElement.className == "dark") {
@@ -53,17 +53,10 @@ const changeIconTheme = () => {
 };
 
 const updateFileName = (event) => {
-  file_name_container.children[0].textContent = event.target.files[0].name
-  file_submit_button.style.display = "inline-flex"
-  file_clear_button.style.display = "inline"
-}
-
-const clearFile = () => {
-  file_name_container.children[0].textContent = "No File Chosen"
-  file_submit_button.style.display = "none"
-  file_clear_button.style.display = "none" 
-}
+  file_name_container.children[0].textContent = event.target.files[0].name;
+  file_submit_button.style.display = "inline-flex";
+  error_container.textContent = "";
+};
 
 theme_switch_icon.addEventListener("click", changeIconTheme);
-file_choose_button.addEventListener("change", updateFileName)
-file_clear_button.addEventListener("click", clearFile)
+file_choose_button.addEventListener("change", updateFileName);
