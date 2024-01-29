@@ -1,10 +1,14 @@
 package handler
 
 import (
+	"encoding/csv"
+	"html/template"
 	"io"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/Tejasmadhukar/MyFitnessPal-Grafana/internal/models"
 )
 
 func Upload(w http.ResponseWriter, r *http.Request) {
@@ -12,8 +16,10 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 	file, header, err := r.FormFile("file")
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("No file or bad file was sent"))
+		var NewError models.HtmlClientError
+		NewError.Status = 400
+		NewError.ErrorMessage = "No file or bad file was sent. Refresh to try again"
+		SendError(NewError, &w)
 		return
 	}
 	defer file.Close()
@@ -21,8 +27,29 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	fileName := strings.Split(header.Filename, ".")
 
 	if fileName[1] != "csv" {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Server only accepts a csv file"))
+		var NewError models.HtmlClientError
+		NewError.Status = 400
+		NewError.ErrorMessage = "Server only accepts a csv file. Refresh to try again"
+		SendError(NewError, &w)
+		return
+	}
+
+	csvReader := csv.NewReader(io.Reader(file))
+
+	record, err := csvReader.Read()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Error reading csv file " + err.Error()))
+		return
+	}
+
+	valid := models.CheckCsvHeaders(record)
+
+	if !valid {
+		var NewError models.HtmlClientError
+		NewError.ErrorMessage = "The csv file you sent is not valid. Missing (Date, Calories, Meal), If you have these then please rename them in your csv file. Refresh to try again"
+		NewError.Status = 400
+		SendError(NewError, &w)
 		return
 	}
 
@@ -36,8 +63,17 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	err = os.WriteFile("internal/assets/data/"+header.Filename, data, 0644)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Could not save file"))
+		w.Write([]byte("Could not save file " + err.Error()))
 		return
 	}
+
+	tmpl, err := template.ParseFiles("internal/handler/templates/success_validation.html")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Html template could not be parse"))
+		return
+	}
+
+	tmpl.Execute(w, nil)
 
 }
