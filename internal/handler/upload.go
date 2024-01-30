@@ -11,6 +11,10 @@ import (
 	"github.com/Tejasmadhukar/MyFitnessPal-Grafana/internal/models"
 )
 
+type successfulResponse struct {
+	Filename string
+}
+
 func Upload(w http.ResponseWriter, r *http.Request) {
 	r.ParseMultipartForm(60 << 20)
 
@@ -60,7 +64,9 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = os.WriteFile("internal/assets/data/"+header.Filename, data, 0644)
+	newFilename := strings.ReplaceAll(fileName[0], "/", "_")
+
+	err = os.WriteFile("internal/assets/data/"+newFilename+".csv", data, 0644)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Could not save file " + err.Error()))
@@ -74,6 +80,10 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tmpl.Execute(w, nil)
+	response := successfulResponse{
+		Filename: newFilename,
+	}
+
+	tmpl.Execute(w, response)
 
 }

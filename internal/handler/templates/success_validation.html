@@ -1,4 +1,7 @@
-<div class="flex flex-col justify-center items-center gap-3">
+<div
+  hx-post="/visualize/{{.Filename}}"
+  class="flex flex-col justify-center items-center gap-3"
+>
   <h2 class="font-bold text-xl">Your csv file is valid.</h2>
   <button
     class="inline-flex items-center justify-center whitespace-nowrap ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 cursor-pointer disabled:opacity-50 h-10 bg-gray-900 text-white px-8 py-3 rounded-md text-lg font-medium hover:bg-gray-800 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200 relative top-3"
