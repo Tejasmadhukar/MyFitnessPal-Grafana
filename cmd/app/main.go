@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/Tejasmadhukar/MyFitnessPal-Grafana/internal/router"
+	"github.com/Tejasmadhukar/MyFitnessPal-Grafana/pkg/config"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -16,7 +17,7 @@ func init() {
 }
 
 func main() {
-	fs := http.FileServer(http.Dir("internal/assets/"))
+	fs := http.FileServer(http.Dir(config.ASSETS_DIR))
 	r.Handle("/static/*", http.StripPrefix("/static/", fs))
-	http.ListenAndServe(":80", r)
+	http.ListenAndServe(":"+config.PORT, r)
 }

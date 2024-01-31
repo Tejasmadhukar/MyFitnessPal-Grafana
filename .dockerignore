@@ -1,3 +1,6 @@
 .venv
 *.ipynb
 .DS_Store
+bin/
+node_modules
+.env

@@ -18,8 +18,7 @@ WORKDIR /app/
 COPY --from=builder /app/bin/main ./
 COPY --from=builder /app/internal/assets ./assets
 
-ENV ASSETS_DIR=./assets
-ENV GOARCH=arm64
+ENV ASSETS_DIR=assets/
 
 EXPOSE 80
 
