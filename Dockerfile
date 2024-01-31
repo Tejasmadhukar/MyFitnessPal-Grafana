@@ -2,8 +2,6 @@ FROM golang:1.21 AS builder
 
 WORKDIR /app/
 
-ENV GOARCH=arm64
-
 ADD go.mod go.sum ./
 RUN go mod download && go mod verify
 
