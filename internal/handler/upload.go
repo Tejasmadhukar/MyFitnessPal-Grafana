@@ -24,7 +24,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		var NewError models.HtmlClientError
 		NewError.Status = 400
 		NewError.ErrorMessage = "No file or bad file was sent. Refresh to try again"
-		SendError(NewError, &w)
+		NewError.Send(&w)
 		return
 	}
 	defer file.Close()
@@ -35,7 +35,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		var NewError models.HtmlClientError
 		NewError.Status = 400
 		NewError.ErrorMessage = "Server only accepts a csv file. Refresh to try again"
-		SendError(NewError, &w)
+		NewError.Send(&w)
 		return
 	}
 
@@ -54,7 +54,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		var NewError models.HtmlClientError
 		NewError.ErrorMessage = "The csv file you sent is not valid. Missing (Date, Calories, Meal), If you have these then please rename them in your csv file. Refresh to try again"
 		NewError.Status = 400
-		SendError(NewError, &w)
+		NewError.Send(&w)
 		return
 	}
 
