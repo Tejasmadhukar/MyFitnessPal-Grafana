@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/Tejasmadhukar/MyFitnessPal-Grafana/internal/models"
+	"github.com/Tejasmadhukar/MyFitnessPal-Grafana/pkg/config"
 )
 
 type successfulResponse struct {
@@ -66,14 +67,14 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 	newFilename := strings.ReplaceAll(fileName[0], "/", "_")
 
-	err = os.WriteFile("internal/assets/data/"+newFilename+".csv", data, 0644)
+	err = os.WriteFile(config.ASSETS_DIR+"data/"+newFilename+".csv", data, 0644)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Could not save file " + err.Error()))
 		return
 	}
 
-	tmpl, err := template.ParseFiles("internal/handler/templates/success_validation.html")
+	tmpl, err := template.ParseFiles(config.ASSETS_DIR + "templates/success_validation.html")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Html template could not be parse"))
