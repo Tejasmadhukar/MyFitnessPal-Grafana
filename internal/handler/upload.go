@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"html/template"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -21,6 +22,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 	file, header, err := r.FormFile("file")
 	if err != nil {
+		log.Println(err)
 		var NewError models.HtmlClientError
 		NewError.Status = 400
 		NewError.ErrorMessage = "No file or bad file was sent. Refresh to try again"
@@ -43,6 +45,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 	record, err := csvReader.Read()
 	if err != nil {
+		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Error reading csv file " + err.Error()))
 		return
@@ -60,6 +63,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 	data, err := io.ReadAll(file)
 	if err != nil {
+		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Error reading file " + err.Error()))
 		return
@@ -69,6 +73,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 	err = os.WriteFile(config.ASSETS_DIR+"data/"+newFilename+".csv", data, 0644)
 	if err != nil {
+		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Could not save file " + err.Error()))
 		return
@@ -76,6 +81,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 	tmpl, err := template.ParseFiles(config.ASSETS_DIR + "templates/success_validation.html")
 	if err != nil {
+		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Html template could not be parse"))
 		return
