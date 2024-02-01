@@ -12,4 +12,5 @@ func AddRoutes(r *chi.Mux) {
 	r.Use(middleware.Heartbeat("/health"))
 	r.Get("/", handler.Index)
 	r.Post("/upload", handler.Upload)
+	r.Post("/visualize/{filename}", handler.Visualize)
 }

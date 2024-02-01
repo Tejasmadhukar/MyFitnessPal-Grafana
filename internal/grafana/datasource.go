@@ -2,7 +2,9 @@ package grafana
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 
@@ -11,43 +13,53 @@ import (
 )
 
 func AddDataSource(fileName string) error {
-
-	fileurl := config.ASSETS_DIR + "data/" + fileName
+	fileurl := config.HOST_URL + "/static/data/" + fileName
 	newID, err := gonanoid.New()
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	datasourceModel := fmt.Sprintf(`{
-    "access": "string",
-    "basicAuth": true,
-    "basicAuthUser": "string",
-    "database": "string",
-    "isDefault": true,
-    "jsonData": {},
-    "name": "marcusolsson-csv-datasource",
-    "secureJsonData": {},
-    "type": "marcusolsson-csv-datasource",
-    "uid": "%v",
-    "url": "%v",
-    "user": "string",
-    "withCredentials": true
-  }`, newID, fileurl)
+      "access": "string",
+      "basicAuth": true,
+      "basicAuthUser": "string",
+      "database": "string",
+      "isDefault": false,
+      "jsonData": {
+        "storage": "http"
+      },
+      "name": "%v",
+      "type": "marcusolsson-csv-datasource",
+      "uid": "%v",
+      "url": "%v",
+      "user": "",
+      "withCredentials": true
+    }`, fileName, newID, fileurl)
 
 	req, err := http.NewRequest("POST", config.GRAFANA_HOST+"/api/datasources", bytes.NewBuffer([]byte(datasourceModel)))
 	if err != nil {
-		log.Fatal("Should not happen")
+		return err
 	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Bearer "+config.GRAFANA_TOKEN)
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 	defer resp.Body.Close()
 
-	if resp.Status != "200" {
-		return err
+	if resp.Status != "200 OK" {
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			log.Printf("Error reading response body %v", err)
+			return err
+		}
+		log.Println(datasourceModel)
+		log.Println(string(body))
+		log.Println(resp.Status)
+		return errors.New("Datasource api did not respond with 200 \n" + string(body))
 	}
 
 	return nil
