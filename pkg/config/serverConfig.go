@@ -8,11 +8,11 @@ import (
 )
 
 var (
-	PORT             = "80"
-	ASSETS_DIR       = "internal/assets/"
-	GRAFANA_USER_ID  = "admin"
-	GRAFANA_PASSWORD = "admin"
-	GRAFANA_HOST     = "http://localhost:3000"
+	PORT          = "80"
+	HOST_URL      = "http://localhost"
+	ASSETS_DIR    = "internal/assets/"
+	GRAFANA_TOKEN = "*"
+	GRAFANA_HOST  = "http://localhost:3000"
 )
 
 func init() {
@@ -29,16 +29,15 @@ func init() {
 		ASSETS_DIR = val
 	}
 
-	if val, ok := os.LookupEnv("GRAFANA_USER_ID"); ok {
-		GRAFANA_USER_ID = val
-	}
-
-	if val, ok := os.LookupEnv("GRAFANA_PASSWORD"); ok {
-		GRAFANA_PASSWORD = val
+	if val, ok := os.LookupEnv("GRAFANA_TOKEN"); ok {
+		GRAFANA_TOKEN = val
 	}
 
 	if val, ok := os.LookupEnv("GRAFANA_HOST"); ok {
 		GRAFANA_HOST = val
 	}
 
+	if val, ok := os.LookupEnv("HOST_URL"); ok {
+		HOST_URL = val
+	}
 }
