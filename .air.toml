@@ -5,7 +5,7 @@ tmp_dir = "bin"
 [build]
 args_bin = []
 bin = "./bin/main"
-cmd = "go build -o ./bin/main ./cmd/app/ && npx tailwindcss -i internal/assets/application.css -o internal/assets/output.css"
+cmd = "go build -o ./bin/main ./cmd/app/"
 delay = 1000
 exclude_dir = ["internal/assets", "tmp", "vendor", "testdata", ".venv", "bin"]
 exclude_file = []
