@@ -46,13 +46,11 @@ func TransformCsv(csvData [][]string) [][]string {
 		}
 	}
 
-	TransformedData := make([][]string, len(GroupedCsvMap))
-
-	i := 0
+	i := 1
 	for _, val := range GroupedCsvMap {
-		TransformedData[i] = val
+		csvData[i] = val
 		i++
 	}
 
-	return TransformedData
+	return csvData[:len(GroupedCsvMap)+1]
 }

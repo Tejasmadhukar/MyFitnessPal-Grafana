@@ -37,6 +37,21 @@ func TestTransformCsv(t *testing.T) {
 	fmt.Println("length before = ", bef, " length after = ", len(csvData))
 	fmt.Println("Function took ", t2.Sub(t1))
 
-	fmt.Println(csvData[1])
+	fmt.Println("Headers = ", csvData[0])
+
+	DuplicateMap := make(map[string]bool)
+	DateIndex := -1
+
+	headers := csvData[0]
+	for idx, val := range headers {
+		if val == "Date" {
+			DateIndex = idx
+		}
+	}
+	for idx, val := range csvData {
+		if _, ok := DuplicateMap[val[DateIndex]]; ok {
+			t.Fatalf("Found duplicate in the resulting csvData at index %d", idx)
+		}
+	}
 
 }
