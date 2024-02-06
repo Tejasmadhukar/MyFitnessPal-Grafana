@@ -43,7 +43,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 	csvReader := csv.NewReader(io.Reader(file))
 
-	record, err := csvReader.Read()
+	csvData, err := csvReader.ReadAll()
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -51,8 +51,10 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	valid := models.CheckCsvHeaders(record)
+	newFilename := strings.ReplaceAll(fileName[0], "/", "_")
+	filepath := config.ASSETS_DIR + "data/" + newFilename + ".csv"
 
+	valid := models.CheckCsvHeaders(csvData[0])
 	if !valid {
 		var NewError models.HtmlClientError
 		NewError.ErrorMessage = "The csv file you sent is not valid. Missing (Date, Calories, Meal), If you have these then please rename them in your csv file. Refresh to try again"
@@ -61,18 +63,20 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := io.ReadAll(file)
+	csvData = models.TransformCsv(csvData)
+
+	fileToWrite, err := os.Create(filepath)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Error reading file " + err.Error()))
+		w.Write([]byte("Could not save file " + err.Error()))
 		return
 	}
 
-	newFilename := strings.ReplaceAll(fileName[0], "/", "_")
+	csvWriter := csv.NewWriter(fileToWrite)
+	csvWriter.WriteAll(csvData)
 
-	err = os.WriteFile(config.ASSETS_DIR+"data/"+newFilename+".csv", data, 0644)
-	if err != nil {
+	if err = csvWriter.Error(); err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Could not save file " + err.Error()))
