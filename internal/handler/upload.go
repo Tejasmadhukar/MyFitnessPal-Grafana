@@ -23,10 +23,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	file, header, err := r.FormFile("file")
 	if err != nil {
 		log.Println(err)
-		var NewError models.HtmlClientError
-		NewError.Status = 400
-		NewError.ErrorMessage = "No file or bad file was sent. Refresh to try again"
-		NewError.Send(&w)
+		models.SendBadRequest(&w, `No file or bad file was sent. Refresh to try again`)
 		return
 	}
 	defer file.Close()
@@ -34,10 +31,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	fileName := strings.Split(header.Filename, ".")
 
 	if fileName[1] != "csv" {
-		var NewError models.HtmlClientError
-		NewError.Status = 400
-		NewError.ErrorMessage = "Server only accepts a csv file. Refresh to try again"
-		NewError.Send(&w)
+		models.SendBadRequest(&w, `Server only accepts a csv file. Refresh to try again`)
 		return
 	}
 
@@ -46,20 +40,22 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	csvData, err := csvReader.ReadAll()
 	if err != nil {
 		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Error reading csv file " + err.Error()))
+		models.SendInternalServerError(&w, "Error reading csv file "+err.Error())
 		return
 	}
 
 	newFilename := strings.ReplaceAll(fileName[0], "/", "_")
 	filepath := config.ASSETS_DIR + "data/" + newFilename + ".csv"
 
-	valid := models.CheckCsvHeaders(csvData[0])
-	if !valid {
-		var NewError models.HtmlClientError
-		NewError.ErrorMessage = "The csv file you sent is not valid. Missing (Date, Calories, Meal), If you have these then please rename them in your csv file. Refresh to try again"
-		NewError.Status = 400
-		NewError.Send(&w)
+	err = models.CheckCsvHeaders(csvData[0])
+	if err != nil {
+		models.SendInternalServerError(&w, err.Error())
+		return
+	}
+
+	err = models.CheckCsvData(csvData)
+	if err != nil {
+		models.SendBadRequest(&w, err.Error())
 		return
 	}
 
@@ -68,8 +64,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	fileToWrite, err := os.Create(filepath)
 	if err != nil {
 		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Could not save file " + err.Error()))
+		models.SendInternalServerError(&w, "Could not create file "+err.Error())
 		return
 	}
 
@@ -78,16 +73,14 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 	if err = csvWriter.Error(); err != nil {
 		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Could not save file " + err.Error()))
+		models.SendInternalServerError(&w, "Could not write to file "+err.Error())
 		return
 	}
 
 	tmpl, err := template.ParseFiles(config.ASSETS_DIR + "templates/success_validation.html")
 	if err != nil {
 		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Html template could not be parse"))
+		models.SendInternalServerError(&w, "HTML template couldn't be parsed")
 		return
 	}
 

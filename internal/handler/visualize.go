@@ -17,12 +17,11 @@ func Visualize(w http.ResponseWriter, r *http.Request) {
 
 	_, err := os.Stat(config.ASSETS_DIR + "data/" + filename)
 	if errors.Is(err, os.ErrNotExist) {
-		log.Println(err)
-		newError := models.HtmlClientError{
+		newError := models.ErrorResponse{
 			Status:       404,
 			ErrorMessage: "File that you want to Visualize does not exist.",
 		}
-		newError.Send(&w)
+		newError.SendError(&w)
 	} else if err != nil {
 		log.Printf("This should not happen %v", err)
 		w.WriteHeader(500)
@@ -31,11 +30,7 @@ func Visualize(w http.ResponseWriter, r *http.Request) {
 
 	err = grafana.AddDataSource(filename)
 	if err != nil {
-		newError := models.HtmlClientError{
-			Status:       500,
-			ErrorMessage: "Grafana api did not respond successfully Error: \n" + err.Error(),
-		}
-		newError.Send(&w)
+		models.SendInternalServerError(&w, "Grafana api did not respond successfully Error: \n"+err.Error())
 		return
 	}
 
