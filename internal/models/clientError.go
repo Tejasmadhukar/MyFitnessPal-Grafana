@@ -2,22 +2,39 @@ package models
 
 import (
 	"html/template"
-	"log"
 	"net/http"
 
 	"github.com/Tejasmadhukar/MyFitnessPal-Grafana/pkg/config"
 )
 
-type HtmlClientError struct {
+type ErrorResponse struct {
 	Status       int32
 	ErrorMessage string
 }
 
-func (ClientError HtmlClientError) Send(w *http.ResponseWriter) {
+func (Error ErrorResponse) SendError(w *http.ResponseWriter) {
 	tmpl, err := template.ParseFiles(config.ASSETS_DIR + "templates/error.html")
 	if err != nil {
-		log.Fatal("Should not happen")
+		panic("should not happen, BAD TEMPLATE   " + err.Error())
 	}
 
-	tmpl.Execute(*w, ClientError)
+	tmpl.Execute(*w, Error)
+}
+
+func SendBadRequest(w *http.ResponseWriter, message string) {
+	Error := &ErrorResponse{
+		Status:       400,
+		ErrorMessage: message,
+	}
+
+	Error.SendError(w)
+}
+
+func SendInternalServerError(w *http.ResponseWriter, message string) {
+	Error := &ErrorResponse{
+		Status:       500,
+		ErrorMessage: message,
+	}
+
+	Error.SendError(w)
 }
