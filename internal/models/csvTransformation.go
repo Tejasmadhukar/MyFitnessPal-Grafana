@@ -2,20 +2,12 @@ package models
 
 import (
 	"fmt"
-	"slices"
 	"strconv"
-	"time"
 )
-
-type ByDate []time.Time
-
-func (t ByDate) Len() int           { return len(t) }
-func (t ByDate) Swap(i, j int)      { t[i], t[j] = t[j], t[i] }
-func (t ByDate) Less(i, j int) bool { return t[i].Before(t[j]) }
 
 func TransformCsv(csvData [][]string) [][]string {
 	DateIndex := -1
-	const shortForm = "2006-01-31"
+	GroupedCsvMap := make(map[string][]string)
 
 	headers := csvData[0]
 	for idx, val := range headers {
@@ -25,36 +17,42 @@ func TransformCsv(csvData [][]string) [][]string {
 	}
 
 	// litreally doing df.groupBy('Date').sum()
-	i := 2
-	for i < len(csvData) {
-		if csvData[i][DateIndex] == csvData[i-1][DateIndex] {
-			startIndex := i - 1
-			for i < len(csvData) && csvData[i][DateIndex] == csvData[i-1][DateIndex] {
-				for idx, val := range csvData[i] {
-					if idx == DateIndex {
-						continue
-					}
-					initialVal, err := strconv.ParseFloat(csvData[startIndex][idx], 32)
-					if err != nil {
-						continue
-					}
+	for i := 1; i < len(csvData); i++ {
+		val, ok := GroupedCsvMap[csvData[i][DateIndex]]
 
-					valToAdd, err := strconv.ParseFloat(val, 32)
-					if err != nil {
-						continue
-					}
-
-					sum := initialVal + valToAdd
-
-					csvData[startIndex][idx] = fmt.Sprintf("%.1f", sum)
-				}
-				i++
-			}
-			csvData = slices.Delete(csvData, startIndex+1, i)
+		if !ok {
+			GroupedCsvMap[csvData[i][DateIndex]] = csvData[i]
 			continue
 		}
+
+		for idx, initialData := range val {
+			if idx == DateIndex {
+				continue
+			}
+
+			initialVal, err := strconv.ParseFloat(initialData, 32)
+			if err != nil {
+				continue
+			}
+
+			valToAdd, err := strconv.ParseFloat(csvData[i][idx], 32)
+			if err != nil {
+				continue
+			}
+
+			sum := initialVal + valToAdd
+
+			GroupedCsvMap[csvData[i][DateIndex]][idx] = fmt.Sprintf("%.1f", sum)
+		}
+	}
+
+	TransformedData := make([][]string, len(GroupedCsvMap))
+
+	i := 0
+	for _, val := range GroupedCsvMap {
+		TransformedData[i] = val
 		i++
 	}
 
-	return csvData
+	return TransformedData
 }

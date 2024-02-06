@@ -36,4 +36,7 @@ func TestTransformCsv(t *testing.T) {
 
 	fmt.Println("length before = ", bef, " length after = ", len(csvData))
 	fmt.Println("Function took ", t2.Sub(t1))
+
+	fmt.Println(csvData[1])
+
 }
