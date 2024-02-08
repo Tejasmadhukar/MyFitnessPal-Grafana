@@ -13,6 +13,9 @@ services:
     build: .
     ports:
       - 80:80
+    environment:
+      GRAFANA_HOST: "http://grafana:3000"
+      HOST_URL: "http://server"
     depends_on:
       - grafana
 volumes:
