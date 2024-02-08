@@ -3,6 +3,7 @@ package models
 import (
 	"html/template"
 	"net/http"
+	"path/filepath"
 
 	"github.com/Tejasmadhukar/MyFitnessPal-Grafana/pkg/config"
 )
@@ -13,7 +14,7 @@ type ErrorResponse struct {
 }
 
 func (Error ErrorResponse) SendError(w *http.ResponseWriter) {
-	tmpl, err := template.ParseFiles(config.ASSETS_DIR + "templates/error.html")
+	tmpl, err := template.ParseFiles(filepath.Join(config.ASSETS_DIR, "templates", "error.html"))
 	if err != nil {
 		panic("should not happen, BAD TEMPLATE   " + err.Error())
 	}

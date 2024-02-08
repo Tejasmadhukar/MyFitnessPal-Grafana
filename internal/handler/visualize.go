@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 
 	"github.com/Tejasmadhukar/MyFitnessPal-Grafana/internal/grafana"
 	"github.com/Tejasmadhukar/MyFitnessPal-Grafana/internal/models"
@@ -15,7 +16,7 @@ import (
 func Visualize(w http.ResponseWriter, r *http.Request) {
 	filename := chi.URLParam(r, "filename") + ".csv"
 
-	_, err := os.Stat(config.ASSETS_DIR + "data/" + filename)
+	_, err := os.Stat(filepath.Join(config.ASSETS_DIR, "data", filename))
 	if errors.Is(err, os.ErrNotExist) {
 		newError := models.ErrorResponse{
 			Status:       404,
