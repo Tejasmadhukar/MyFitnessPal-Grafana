@@ -7,10 +7,12 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/Tejasmadhukar/MyFitnessPal-Grafana/internal/models"
 	"github.com/Tejasmadhukar/MyFitnessPal-Grafana/pkg/config"
+	"github.com/matoous/go-nanoid/v2"
 )
 
 type successfulResponse struct {
@@ -18,7 +20,10 @@ type successfulResponse struct {
 }
 
 func Upload(w http.ResponseWriter, r *http.Request) {
-	r.ParseMultipartForm(60 << 20)
+	if err := r.ParseMultipartForm(50 << 20); err != nil {
+		models.SendInternalServerError(&w, "Cannot parse multipart form. Error : "+err.Error())
+		return
+	}
 
 	file, header, err := r.FormFile("file")
 	if err != nil {
@@ -44,9 +49,6 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newFilename := strings.ReplaceAll(fileName[0], "/", "_")
-	filepath := config.ASSETS_DIR + "data/" + newFilename + ".csv"
-
 	err = models.CheckCsvHeaders(csvData[0])
 	if err != nil {
 		models.SendInternalServerError(&w, err.Error())
@@ -61,7 +63,11 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 	csvData = models.TransformCsv(csvData)
 
-	fileToWrite, err := os.Create(filepath)
+	id := gonanoid.Must()
+	newFilename := id + ".csv"
+	newFilepath := filepath.Join(config.ASSETS_DIR, newFilename)
+
+	fileToWrite, err := os.Create(newFilepath)
 	if err != nil {
 		log.Println(err)
 		models.SendInternalServerError(&w, "Could not create file "+err.Error())
@@ -77,7 +83,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tmpl, err := template.ParseFiles(config.ASSETS_DIR + "templates/success_validation.html")
+	tmpl, err := template.ParseFiles(filepath.Join(config.ASSETS_DIR, "templates", "success_validation.html"))
 	if err != nil {
 		log.Println(err)
 		models.SendInternalServerError(&w, "HTML template couldn't be parsed")
