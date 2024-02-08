@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"slices"
 	"strconv"
-	"time"
 )
 
 var (
@@ -22,13 +21,11 @@ func CheckCsvHeaders(Headers []string) error {
 }
 
 func CheckCsvData(csvData [][]string) error {
-	DateIndex, CalroiesIndex := -1, -1
+	CalroiesIndex := -1
 	const shortForm = "2006-01-31"
 
 	for idx, val := range csvData[0] {
-		if val == "Date" {
-			DateIndex = idx
-		} else if val == "Calories" {
+		if val == "Calories" {
 			CalroiesIndex = idx
 		}
 	}
@@ -36,15 +33,10 @@ func CheckCsvData(csvData [][]string) error {
 	for idx, val := range csvData[1:] {
 		_, err := strconv.ParseFloat(val[CalroiesIndex], 32)
 		if err != nil {
-			errorMessage := fmt.Sprintf(`Your csv file contains is not of valid type. At index %d Calories column could not be parsed into a floating point number. Here is the underlying error message %s`, idx+1, err.Error())
+			errorMessage := fmt.Sprintf(`Your csv file contains is not of valid type. At index %d Calories column could not be parsed into a floating point number. Error: %s`, idx+1, err.Error())
 			return errors.New(errorMessage)
 		}
 
-		_, err = time.Parse(shortForm, val[DateIndex])
-		if err != nil {
-			errorMessage := fmt.Sprintf(`Your csv file contains is not of valid type. At index %d Date column could not be parsed into a DateTime object. Here is the underlying error message %s`, idx+1, err.Error())
-			return errors.New(errorMessage)
-		}
 	}
 
 	return nil
