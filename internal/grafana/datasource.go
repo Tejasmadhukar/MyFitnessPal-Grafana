@@ -18,8 +18,8 @@ func AddDataSource(fileName string) error {
 
 	datasourceModel := strings.NewReader(fmt.Sprintf(`{
       "access": "proxy",
-      "basicAuth": true,
-      "basicAuthUser": "basicuser",
+      "basicAuth": false,
+      "basicAuthUser": "",
       "database": "string",
       "isDefault": false,
       "jsonData": {
