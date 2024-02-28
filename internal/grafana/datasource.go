@@ -14,12 +14,12 @@ import (
 
 func AddDataSource(fileName string) error {
 	host := config.HOST_URL + ":" + config.PORT
-	fileurl := filepath.Join(host, "static", fileName)
+	fileurl := host + "/" + filepath.Join("static", fileName)
 
 	datasourceModel := strings.NewReader(fmt.Sprintf(`{
-      "access": "string",
+      "access": "proxy",
       "basicAuth": true,
-      "basicAuthUser": "string",
+      "basicAuthUser": "basicuser",
       "database": "string",
       "isDefault": false,
       "jsonData": {
@@ -27,11 +27,11 @@ func AddDataSource(fileName string) error {
       },
       "name": "%v",
       "type": "marcusolsson-csv-datasource",
-      "uid": "string",
+      "uid": "%v",
       "url": "%v",
       "user": "",
       "withCredentials": true
-    }`, fileName, fileurl))
+    }`, fileName, fileName, fileurl))
 
 	req, err := http.NewRequest("POST", config.GRAFANA_HOST+"/api/datasources", datasourceModel)
 	if err != nil {
