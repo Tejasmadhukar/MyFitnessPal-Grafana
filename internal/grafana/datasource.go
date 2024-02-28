@@ -12,9 +12,9 @@ import (
 	"github.com/Tejasmadhukar/MyFitnessPal-Grafana/pkg/config"
 )
 
-func AddDataSource(fileName string) error {
-	host := config.HOST_URL + ":" + config.PORT
-	fileurl := host + "/" + filepath.Join("static", fileName)
+func AddDataSource(fileID string) error {
+	host := config.HOST_URL
+	fileurl := host + "/" + filepath.Join("static", fileID+".csv")
 
 	datasourceModel := strings.NewReader(fmt.Sprintf(`{
       "access": "proxy",
@@ -31,7 +31,7 @@ func AddDataSource(fileName string) error {
       "url": "%v",
       "user": "",
       "withCredentials": true
-    }`, fileName, fileName, fileurl))
+    }`, fileID, fileID, fileurl))
 
 	req, err := http.NewRequest("POST", config.GRAFANA_HOST+"/api/datasources", datasourceModel)
 	if err != nil {
