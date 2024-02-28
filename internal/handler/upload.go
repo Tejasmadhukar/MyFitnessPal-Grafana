@@ -7,10 +7,12 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/Tejasmadhukar/MyFitnessPal-Grafana/internal/models"
 	"github.com/Tejasmadhukar/MyFitnessPal-Grafana/pkg/config"
+	"github.com/matoous/go-nanoid/v2"
 )
 
 type successfulResponse struct {
@@ -18,15 +20,15 @@ type successfulResponse struct {
 }
 
 func Upload(w http.ResponseWriter, r *http.Request) {
-	r.ParseMultipartForm(60 << 20)
+	if err := r.ParseMultipartForm(50 << 20); err != nil {
+		models.SendInternalServerError(&w, "Cannot parse multipart form. Error : "+err.Error())
+		return
+	}
 
 	file, header, err := r.FormFile("file")
 	if err != nil {
 		log.Println(err)
-		var NewError models.HtmlClientError
-		NewError.Status = 400
-		NewError.ErrorMessage = "No file or bad file was sent. Refresh to try again"
-		NewError.Send(&w)
+		models.SendBadRequest(&w, `No file or bad file was sent. Refresh to try again`)
 		return
 	}
 	defer file.Close()
@@ -34,61 +36,62 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	fileName := strings.Split(header.Filename, ".")
 
 	if fileName[1] != "csv" {
-		var NewError models.HtmlClientError
-		NewError.Status = 400
-		NewError.ErrorMessage = "Server only accepts a csv file. Refresh to try again"
-		NewError.Send(&w)
+		models.SendBadRequest(&w, `Server only accepts a csv file. Refresh to try again`)
 		return
 	}
 
 	csvReader := csv.NewReader(io.Reader(file))
 
-	record, err := csvReader.Read()
+	csvData, err := csvReader.ReadAll()
 	if err != nil {
 		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Error reading csv file " + err.Error()))
+		models.SendInternalServerError(&w, "Error reading csv file "+err.Error())
 		return
 	}
 
-	valid := models.CheckCsvHeaders(record)
-
-	if !valid {
-		var NewError models.HtmlClientError
-		NewError.ErrorMessage = "The csv file you sent is not valid. Missing (Date, Calories, Meal), If you have these then please rename them in your csv file. Refresh to try again"
-		NewError.Status = 400
-		NewError.Send(&w)
+	err = models.CheckCsvHeaders(csvData[0])
+	if err != nil {
+		models.SendBadRequest(&w, err.Error())
 		return
 	}
 
-	data, err := io.ReadAll(file)
+	err = models.CheckCsvData(csvData)
 	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Error reading file " + err.Error()))
+		models.SendBadRequest(&w, err.Error())
 		return
 	}
 
-	newFilename := strings.ReplaceAll(fileName[0], "/", "_")
+	csvData = models.TransformCsv(csvData)
 
-	err = os.WriteFile(config.ASSETS_DIR+"data/"+newFilename+".csv", data, 0644)
+	id := gonanoid.Must()
+	newFilename := id + ".csv"
+	newFilepath := filepath.Join(config.ASSETS_DIR, newFilename)
+
+	fileToWrite, err := os.Create(newFilepath)
 	if err != nil {
 		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Could not save file " + err.Error()))
+		models.SendInternalServerError(&w, "Could not create file "+err.Error())
 		return
 	}
 
-	tmpl, err := template.ParseFiles(config.ASSETS_DIR + "templates/success_validation.html")
+	csvWriter := csv.NewWriter(fileToWrite)
+	csvWriter.WriteAll(csvData)
+
+	if err = csvWriter.Error(); err != nil {
+		log.Println(err)
+		models.SendInternalServerError(&w, "Could not write to file "+err.Error())
+		return
+	}
+
+	tmpl, err := template.ParseFiles(filepath.Join(config.ASSETS_DIR, "templates", "success_validation.html"))
 	if err != nil {
 		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Html template could not be parse"))
+		models.SendInternalServerError(&w, "HTML template couldn't be parsed")
 		return
 	}
 
 	response := successfulResponse{
-		Filename: newFilename,
+		Filename: id,
 	}
 
 	tmpl.Execute(w, response)

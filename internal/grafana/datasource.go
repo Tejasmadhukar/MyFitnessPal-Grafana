@@ -1,28 +1,25 @@
 package grafana
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"path/filepath"
+	"strings"
 
 	"github.com/Tejasmadhukar/MyFitnessPal-Grafana/pkg/config"
-	"github.com/matoous/go-nanoid/v2"
 )
 
 func AddDataSource(fileName string) error {
-	fileurl := config.HOST_URL + "/static/data/" + fileName
-	newID, err := gonanoid.New()
-	if err != nil {
-		log.Fatal(err)
-	}
+	host := config.HOST_URL + ":" + config.PORT
+	fileurl := host + "/" + filepath.Join("static", fileName)
 
-	datasourceModel := fmt.Sprintf(`{
-      "access": "string",
-      "basicAuth": true,
-      "basicAuthUser": "string",
+	datasourceModel := strings.NewReader(fmt.Sprintf(`{
+      "access": "proxy",
+      "basicAuth": false,
+      "basicAuthUser": "",
       "database": "string",
       "isDefault": false,
       "jsonData": {
@@ -34,9 +31,9 @@ func AddDataSource(fileName string) error {
       "url": "%v",
       "user": "",
       "withCredentials": true
-    }`, fileName, newID, fileurl)
+    }`, fileName, fileName, fileurl))
 
-	req, err := http.NewRequest("POST", config.GRAFANA_HOST+"/api/datasources", bytes.NewBuffer([]byte(datasourceModel)))
+	req, err := http.NewRequest("POST", config.GRAFANA_HOST+"/api/datasources", datasourceModel)
 	if err != nil {
 		return err
 	}
