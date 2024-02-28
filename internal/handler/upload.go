@@ -51,7 +51,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 
 	err = models.CheckCsvHeaders(csvData[0])
 	if err != nil {
-		models.SendInternalServerError(&w, err.Error())
+		models.SendBadRequest(&w, err.Error())
 		return
 	}
 
@@ -91,7 +91,7 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := successfulResponse{
-		Filename: newFilename,
+		Filename: id,
 	}
 
 	tmpl.Execute(w, response)

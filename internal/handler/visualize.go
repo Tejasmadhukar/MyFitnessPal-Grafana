@@ -16,13 +16,14 @@ import (
 func Visualize(w http.ResponseWriter, r *http.Request) {
 	filename := chi.URLParam(r, "filename") + ".csv"
 
-	_, err := os.Stat(filepath.Join(config.ASSETS_DIR, "data", filename))
+	_, err := os.Stat(filepath.Join(config.ASSETS_DIR, filename))
 	if errors.Is(err, os.ErrNotExist) {
 		newError := models.ErrorResponse{
 			Status:       404,
 			ErrorMessage: "File that you want to Visualize does not exist.",
 		}
 		newError.SendError(&w)
+		return
 	} else if err != nil {
 		log.Printf("This should not happen %v", err)
 		w.WriteHeader(500)
@@ -36,4 +37,8 @@ func Visualize(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Write([]byte("successfully created datasource now make dashboard"))
+
+	go func() {
+		os.Remove(filepath.Join(config.ASSETS_DIR, filename))
+	}()
 }
