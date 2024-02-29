@@ -62,7 +62,7 @@ func Visualize(w http.ResponseWriter, r *http.Request) {
 
 	tmpl.Execute(w, response)
 
-	go func() {
-		os.Remove(filepath.Join(config.ASSETS_DIR, filename))
-	}()
+	// go func() {
+	// 	os.Remove(filepath.Join(config.ASSETS_DIR, filename))
+	// }()
 }
