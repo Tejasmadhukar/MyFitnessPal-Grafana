@@ -17,8 +17,8 @@ func CreateSnapShot(fileId string) (string, error) {
     "dashboard": "%v"
     "expires": 0,
     "external": false,
-    "name": "test-snapshot"
-  }`, GetDashboard(fileId)))
+    "name": "%v"
+  }`, GetDashboard(fileId), fileId))
 
 	req, err := http.NewRequest("POST", config.GRAFANA_HOST+"/api/datasources", snapShotBody)
 	if err != nil {
@@ -37,7 +37,6 @@ func CreateSnapShot(fileId string) (string, error) {
 	err = json.NewDecoder(resp.Body).Decode(&responseJson)
 
 	if resp.Status != "200 OK" {
-		log.Println(snapShotBody)
 		log.Println(responseJson)
 		log.Println(resp.Status)
 		return "", errors.New(fmt.Sprintf("Datasource api did not respond with 200 \n %+v", responseJson))

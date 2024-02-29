@@ -226,9 +226,9 @@ func GetDashboard(fileuid string) string {
     },
     "timepicker": {},
     "timezone": "",
-    "title": "test-dashboard",
+    "title": "%v",
     "uid": null,
     "version": 2,
-    "weekStart": ""},`, fileuid, fileuid, fileuid, fileuid)
+    "weekStart": ""},`, fileuid, fileuid, fileuid, fileuid, fileuid)
 	return dashboardModel
 }
