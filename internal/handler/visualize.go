@@ -42,8 +42,6 @@ func Visualize(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte("successfully created datasource now make dashboard"))
-
 	snapshotUrl, err := grafana.CreateSnapShot(fileID)
 	if err != nil {
 		models.SendInternalServerError(&w, "Grafana snapshots api did not respond successfully Error: \n"+err.Error())
