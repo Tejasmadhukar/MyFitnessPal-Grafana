@@ -14,7 +14,7 @@ import (
 func CreateSnapShot(fileId string) (string, error) {
 	var responseJson map[string]interface{}
 	snapShotBody := strings.NewReader(fmt.Sprintf(`{
-    "dashboard": "%v"
+    "dashboard": %v,
     "expires": 0,
     "external": false,
     "name": "%v"
