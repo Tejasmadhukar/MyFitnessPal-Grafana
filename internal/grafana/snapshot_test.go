@@ -6,7 +6,7 @@ import (
 )
 
 func TestCreateSnapShot(t *testing.T) {
-	fileId := "MZwL4VemntraAvWMBpzjr"
+	fileId := "urdZlJnjRw2OQJeXhQgKf"
 
 	snapShotBody := fmt.Sprintf(`{
     "dashboard": %v,

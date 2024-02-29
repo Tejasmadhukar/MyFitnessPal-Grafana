@@ -20,7 +20,7 @@ func CreateSnapShot(fileId string) (string, error) {
     "name": "%v"
   }`, GetDashboard(fileId), fileId))
 
-	req, err := http.NewRequest("POST", config.GRAFANA_HOST+"/api/datasources", snapShotBody)
+	req, err := http.NewRequest("POST", config.GRAFANA_HOST+"/api/snapshots", snapShotBody)
 	if err != nil {
 		return "", err
 	}

@@ -1,0 +1,8 @@
+{
+	"scripts": {
+		"dev": "pnpx tailwindcss -i internal/assets/application.css -o internal/assets/output.css --watch"
+	},
+	"devDependencies": {
+		"tailwindcss": "^3.4.1"
+	}
+}
