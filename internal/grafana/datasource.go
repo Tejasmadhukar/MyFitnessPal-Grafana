@@ -20,7 +20,7 @@ func AddDataSource(fileID string) error {
       "access": "proxy",
       "basicAuth": false,
       "basicAuthUser": "",
-      "database": "string",
+      "database": "",
       "isDefault": false,
       "jsonData": {
         "storage": "http"
@@ -30,7 +30,7 @@ func AddDataSource(fileID string) error {
       "uid": "%v",
       "url": "%v",
       "user": "",
-      "withCredentials": true
+      "withCredentials": false
     }`, fileID, fileID, fileurl))
 
 	req, err := http.NewRequest("POST", config.GRAFANA_HOST+"/api/datasources", datasourceModel)
