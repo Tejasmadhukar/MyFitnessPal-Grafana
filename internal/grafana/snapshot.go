@@ -16,9 +16,10 @@ func CreateSnapShot(fileId string) (string, error) {
 	snapShotBody := strings.NewReader(fmt.Sprintf(`{
     "dashboard": %v,
     "expires": 0,
-    "external": false,
-    "name": "%v"
-  }`, GetDashboard(fileId), fileId))
+    "external": true,
+    "key": "%v",
+    "deleteKey": "del%v"
+  }`, GetDashboard(fileId), fileId, fileId))
 
 	req, err := http.NewRequest("POST", config.GRAFANA_HOST+"/api/snapshots", snapShotBody)
 	if err != nil {
