@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestCreateSnapShot(t *testing.T) {
+func TestCreateDashboard(t *testing.T) {
 	fileId := "urdZlJnjRw2OQJeXhQgKf"
 
 	snapShotBody := fmt.Sprintf(`{
