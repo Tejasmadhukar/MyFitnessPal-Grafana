@@ -2,6 +2,7 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -15,7 +16,7 @@ import (
 )
 
 type FinalDashboard struct {
-	SnapshotUrl string
+	EmbedUrl string
 }
 
 func Visualize(w http.ResponseWriter, r *http.Request) {
@@ -42,9 +43,14 @@ func Visualize(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	snapshotUrl, err := grafana.CreateSnapShot(fileID)
+	dashboardID, err := grafana.CreateDashboard(fileID)
 	if err != nil {
-		models.SendInternalServerError(&w, "Grafana snapshots api did not respond successfully Error: \n"+err.Error())
+		models.SendInternalServerError(&w, "Grafana dashboard api did not respond successfully Error: \n"+err.Error())
+	}
+
+	public_accessToken, err := grafana.CreatePublicDashboard(dashboardID)
+	if err != nil {
+		models.SendInternalServerError(&w, "Grafana public_dashboard api did not respond successfully Error: \n"+err.Error())
 	}
 
 	tmpl, err := template.ParseFiles(filepath.Join(config.ASSETS_DIR, "templates", "snapshot_iframe.html"))
@@ -54,8 +60,10 @@ func Visualize(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	iframeUrl := fmt.Sprintf("%v/public-dashboards/%v", config.GRAFANA_HOST, public_accessToken)
+
 	response := &FinalDashboard{
-		SnapshotUrl: snapshotUrl,
+		EmbedUrl: iframeUrl,
 	}
 
 	tmpl.Execute(w, response)
