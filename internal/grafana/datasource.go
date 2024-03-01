@@ -56,7 +56,7 @@ func AddDataSource(fileID string) error {
 		log.Println(datasourceModel)
 		log.Println(string(body))
 		log.Println(resp.Status)
-		return errors.New("Datasource api did not respond with 200 \n" + string(body))
+		return errors.New(string(body))
 	}
 
 	return nil
