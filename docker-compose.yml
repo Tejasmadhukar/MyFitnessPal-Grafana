@@ -7,6 +7,12 @@ services:
     restart: unless-stopped
     ports:
       - 3000:3000
+    environment:
+      PORT: 3000
+      GF_SERVER_HTTP_PORT: $PORT
+      GF_SERVER_DOMAIN: "grafana"
+      GF_SECURITY_ALLOW_EMBEDDING: true
+      GF_INSTALL_PLUGINS: "marcusolsson-csv-datasource"
     volumes:
       - grafana-storage:/var/lib/grafana
   server:
