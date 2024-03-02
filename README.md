@@ -31,3 +31,8 @@ Make sure you have docker installed.
    docker-compose up
    ```
 6. Use the app at http://localhost:80 !!!
+
+### Tech Stack 
+1. go & [go-chi](https://go-chi.io/#/)
+2. [htmx](https://htmx.org/)
+3. [grafana](https://grafana.com/)
