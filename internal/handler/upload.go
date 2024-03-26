@@ -95,5 +95,4 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tmpl.Execute(w, response)
-
 }

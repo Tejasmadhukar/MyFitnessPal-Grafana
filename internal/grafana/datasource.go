@@ -1,11 +1,8 @@
 package grafana
 
 import (
-	"errors"
 	"fmt"
-	"io"
-	"log"
-	"net/http"
+	"net/url"
 	"path/filepath"
 	"strings"
 
@@ -13,8 +10,10 @@ import (
 )
 
 func AddDataSource(fileID string) error {
-	host := config.HOST_URL
-	fileurl := host + "/" + filepath.Join("static", fileID+".csv")
+	fileurl, err := url.JoinPath(config.GRAFANA_HOST, filepath.Join("static", fileID+".csv"))
+	if err != nil {
+		return err
+	}
 
 	datasourceModel := strings.NewReader(fmt.Sprintf(`{
       "access": "proxy",
@@ -33,30 +32,10 @@ func AddDataSource(fileID string) error {
       "withCredentials": false
     }`, fileID, fileID, fileurl))
 
-	req, err := http.NewRequest("POST", config.GRAFANA_HOST+"/api/datasources", datasourceModel)
-	if err != nil {
+	DataSourceEndpoint := "/api/datasources"
+
+	if _, err = SendGrafanaRequest("POST", DataSourceEndpoint, datasourceModel); err != nil {
 		return err
-	}
-
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", "Bearer "+config.GRAFANA_TOKEN)
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.Status != "200 OK" {
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			log.Printf("Error reading response body %v", err)
-			return err
-		}
-		log.Println(datasourceModel)
-		log.Println(string(body))
-		log.Println(resp.Status)
-		return errors.New(string(body))
 	}
 
 	return nil
